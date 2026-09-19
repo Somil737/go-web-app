@@ -92,4 +92,28 @@ jobs:
         git add helm/go-web-app-chart/values.yaml
         git commit -m "Update tag in Helm chart"
         git push
+  deploy:
+    runs-on: ubuntu-latest
+
+    # This ensures the deployment only happens AFTER the new image tag is written to Git
+    needs: update-newtag-in-helm-chart
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1  # Change this if your cluster is in a different region
+
+    - name: Update Kubeconfig for EKS
+      run: |
+        aws eks update-kubeconfig --name demo-cluster
+
+    - name: Deploy application via Helm
+      run: |
+        helm upgrade --install go-web-app ./helm/go-web-app-chart --set service.type=LoadBalancer
 
