@@ -1,0 +1,19 @@
+# monitoring/values-prometheus.yaml
+grafana:
+  enabled: true
+  adminPassword: "admin" # For local testing/demo purposes
+  service:
+    type: LoadBalancer
+    port: 3000
+
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    retention: "6h"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 250Mi
+      limits:
+        cpu: 500m
+        memory: 500Mi
